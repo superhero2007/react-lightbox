@@ -1,10 +1,16 @@
 // Dependencies
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 // Components
 import ImagePreview from './ImagePreview';
+import ImageModal from './ImageModal';
 
+interface KeyboardEvent {
+  keyCode: number;
+}
+
+// Constants
 const IMAGE_URLS: Array<string> = [
   "https://lh3.googleusercontent.com/YEcRcfKUaq3mA3vHN_VcE2G4TN8ZzvyTJnjfOXgVHjfCO3u2zKjJmK6xTdEUm6q5F8OTTcTB7EoiZ4ePpknxq8Jz",
   "https://lh3.googleusercontent.com/0jGB0WpcTOTGUAjSkLZFjV2lox-9rZ1WhduWJYdXlThaaowvZVm7RfvB0F7S6SkaRZTA1L3-O8Ik5x47d4bt8riR",
@@ -14,6 +20,33 @@ const IMAGE_URLS: Array<string> = [
 ];
 
 function App() {
+  const [selected, setSelected] = useState(-1);
+
+  const handleUserKeyPress = useCallback((event: KeyboardEvent) => {
+    if (selected === -1) return;
+    const { keyCode } = event;
+
+    if (keyCode === 37) {
+      setSelected((selected + IMAGE_URLS.length - 1) % IMAGE_URLS.length);
+    }
+
+    if (keyCode === 39) {
+      setSelected((selected + 1) % IMAGE_URLS.length);
+    }
+  }, [selected]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleUserKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleUserKeyPress);
+    };
+  }, [handleUserKeyPress]);
+
+  const onClose = () => {
+    setSelected(-1);
+  };
+
   return (
     <DivContainer>
       <AppInstructions>
@@ -21,10 +54,14 @@ function App() {
       </AppInstructions>
 
       <AppItemsContainer>
-        {IMAGE_URLS.map(imageUrl =>
-          <AppItem url={imageUrl} key={imageUrl} />
+        {IMAGE_URLS.map((imageUrl, index ) =>
+          <AppItem key={imageUrl} onClick={() => setSelected(index)}>
+            <ImagePreview url={imageUrl} />
+          </AppItem>
         )}
       </AppItemsContainer>
+
+      {selected !== -1 && <ImageModal url={IMAGE_URLS[selected]} onClose={onClose} />}
     </DivContainer>
   );
 }
@@ -32,7 +69,6 @@ function App() {
 // Styles
 const DivContainer = styled.div`
   width: 100%;
-  padding: 20px;
 `;
 
 const AppInstructions = styled.div`
@@ -44,7 +80,7 @@ const AppItemsContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const AppItem = styled(ImagePreview)`
+const AppItem = styled.div`
   margin-right: 10px;
   margin-bottom: 10px;
 `;

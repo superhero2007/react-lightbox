@@ -5,7 +5,6 @@ import styled from 'styled-components';
 // Interface
 interface Props {
   url: string
-  className?: string
 }
 
 interface ImageProps {
@@ -13,9 +12,9 @@ interface ImageProps {
 }
 
 // Component
-const ImagePreview = ({ url, className }: Props) => {
+const ImagePreview = ({ url }: Props) => {
   return (
-    <DivContainer className={className}>
+    <DivContainer>
       <ImagePreviewImage url={url} />
     </DivContainer>
   )
